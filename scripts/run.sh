@@ -28,6 +28,10 @@ case "$COMMAND" in
         go run "${PROJECT_ROOT}/cmd/ambulance-api-service"
         ;;
 
+    "test")
+        go test -v ./...
+        ;;
+
     "mongo")
         mongo_cmd up
         ;;
