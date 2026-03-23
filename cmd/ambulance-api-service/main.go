@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TechOctopus/ambulance-webapi/api"
+	"github.com/TechOctopus/ambulance-webapi/internal/ambulance_wl"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +22,14 @@ func main() {
     }
     engine := gin.New()
     engine.Use(gin.Recovery())
+
+    handleFunctions := &ambulance_wl.ApiHandleFunctions{
+        AmbulanceConditionsAPI:  ambulance_wl.NewAmbulanceConditionsApi(),
+        AmbulanceWaitingListAPI: ambulance_wl.NewAmbulanceWaitingListApi(),
+    }
+
+    ambulance_wl.NewRouterWithGinEngine(engine, *handleFunctions)
+  
     // request routings
     engine.GET("/openapi", api.HandleOpenApi)
     engine.Run(":" + port)
