@@ -16,6 +16,8 @@ tags:
   name: ambulanceWaitingList
 - description: Patient conditions and symptoms handled in the ambulance
   name: ambulanceConditions
+- description: Ambulance details
+  name: ambulances
 paths:
   /waiting-list/{ambulanceId}/entries:
     get:
@@ -234,6 +236,58 @@ paths:
       summary: Provides the list of conditions associated with ambulance
       tags:
       - ambulanceConditions
+  /ambulance:
+    post:
+      description: Use this method to initialize new ambulance in the system
+      operationId: createAmbulance
+      requestBody:
+        content:
+          application/json:
+            examples:
+              request-sample:
+                $ref: "#/components/examples/AmbulanceExample"
+            schema:
+              $ref: "#/components/schemas/Ambulance"
+        description: Ambulance details to store
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                updated-response:
+                  $ref: "#/components/examples/AmbulanceExample"
+              schema:
+                $ref: "#/components/schemas/Ambulance"
+          description: Value of stored ambulance
+        "400":
+          description: Missing mandatory properties of input object.
+        "409":
+          description: Entry with the specified id already exists
+      summary: Saves new ambulance definition
+      tags:
+      - ambulances
+  /ambulance/{ambulanceId}:
+    delete:
+      description: Use this method to delete the specific ambulance from the system.
+      operationId: deleteAmbulance
+      parameters:
+      - description: pass the id of the particular ambulance
+        explode: false
+        in: path
+        name: ambulanceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Item deleted
+        "404":
+          description: Ambulance with such ID does not exist
+      summary: Deletes specific ambulance
+      tags:
+      - ambulances
 components:
   examples:
     WaitingListEntryExample:
@@ -284,6 +338,53 @@ components:
           value: Nevoľnosť
           code: nausea
           reference: https://zdravoteka.sk/priznaky/nevolnost/
+    AmbulanceExample:
+      description: |
+        Example of GP ambulance with waiting list and predefined conditions
+      summary: Sample GP ambulance
+      value:
+        id: gp-warenova
+        name: Ambulancia všeobecného lekárstva Dr. Warenová
+        roomNumber: 356 - 3.posch
+        waitingList:
+        - id: x321ab3
+          name: Jožko Púčik
+          patientId: 460527-jozef-pucik
+          waitingSince: 2038-12-24T10:05:00.000Z
+          estimatedStart: 2038-12-24T10:35:00.000Z
+          estimatedDurationMinutes: 15
+          condition: null
+          value: Teploty
+          code: subfebrilia
+          reference: https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/
+        - id: x321ab4
+          name: Ferdinand Trety
+          patientId: 780907-ferdinand-tre
+          waitingSince: 2038-12-24T10:25:00.000Z
+          estimatedStart: 2038-12-24T10:50:00.000Z
+          estimatedDurationMinutes: 25
+          condition: null
+          value: Nevoľnosť
+          code: nausea
+          reference: https://zdravoteka.sk/priznaky/nevolnost/
+        predefinedConditions:
+        - value: Teploty
+          code: subfebrilia
+          reference: https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/
+          typicalDurationMinutes: 20
+        - value: Nevoľnosť
+          code: nausea
+          reference: https://zdravoteka.sk/priznaky/nevolnost/
+          typicalDurationMinutes: 45
+        - value: Kontrola
+          code: followup
+          typicalDurationMinutes: 15
+        - value: Administratívny úkon
+          code: administration
+          typicalDurationMinutes: 10
+        - value: Odber krvi
+          code: blood-test
+          typicalDurationMinutes: 10
     ConditionsListExample:
       description: |
         Example list of possible conditions, symptoms, and visit reasons
@@ -369,3 +470,31 @@ components:
           type: integer
       required:
       - value
+    Ambulance:
+      example:
+        $ref: "#/components/examples/AmbulanceExample"
+      properties:
+        id:
+          description: Unique identifier of the ambulance
+          example: dentist-warenova
+          type: string
+        name:
+          description: Human readable display name of the ambulance
+          example: Zubná ambulancia Dr. Warenová
+          type: string
+        roomNumber:
+          example: 356 - 3.posch
+          type: string
+        waitingList:
+          items:
+            $ref: "#/components/schemas/WaitingListEntry"
+          type: array
+        predefinedConditions:
+          items:
+            $ref: "#/components/schemas/Condition"
+          type: array
+      required:
+      - id
+      - name
+      - roomNumber
+      type: object
