@@ -28,6 +28,10 @@ case "$COMMAND" in
         go run "${PROJECT_ROOT}/cmd/ambulance-api-service"
         ;;
 
+    "docker")
+        docker build -t "fiitkar/ambulance-wl-webapi:local-build" -f "${PROJECT_ROOT}/build/docker/Dockerfile" .
+        ;;
+
     "test")
         go test -v ./...
         ;;
